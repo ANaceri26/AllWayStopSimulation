@@ -1,0 +1,11 @@
+*.asv
+*.m~
+*.mex*
+slprj/
+*.slxc
+*.autosave
+*.mat
+*.gif
+!demo.gif
+.DS_Store
+Thumbs.db
