@@ -1,5 +1,5 @@
 # All-Way Stop with Autonomous Cars
-
+   ![demo](demo.gif)
 A small, self-contained simulator of autonomous cars negotiating a four-way stop,
 plus four side demos built on ideas from the MathWorks Automotive Conference talks.
 
