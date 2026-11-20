@@ -1,7 +1,5 @@
 classdef AllWayStopTest < matlab.unittest.TestCase
     %ALLWAYSTOPTEST  Unit tests for the all-way-stop simulator.
-    %   results = runtests('AllWayStopTest');
-    %   table(results)
 
     properties (TestParameter)
         scenario = {'single', 'fifo', 'tie_right', 'head_on_left', 'concurrent', ...

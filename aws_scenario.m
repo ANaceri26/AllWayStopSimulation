@@ -2,9 +2,6 @@ function [cars, peds, P, expect, info] = aws_scenario(name)
 %AWS_SCENARIO  Library of all-way-stop test scenarios.
 %   [cars, peds, P, expect, info] = aws_scenario(name)
 %   names = aws_scenario('list')      returns all scenario names
-%
-%   expect  what a correct run must look like (used by aws_check)
-%   info    one-line description
 
 names = {'single', 'fifo', 'tie_right', 'head_on_left', 'concurrent', ...
          'deadlock4', 'queue', 'pedestrian', 'runner', 'false_start', 'rush_hour'};
@@ -95,7 +92,6 @@ switch lower(name)
 end
 end
 
-% ----------------------------------------------------------------------------
 function c = mk(dirChar, turn, tSpawn, type)
 if nargin < 4, type = 'av'; end
 c.approach = find('SENW' == dirChar) - 1;

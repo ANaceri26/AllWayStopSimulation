@@ -1,23 +1,11 @@
-%DEMO_NN_SURROGATE  Replace the slow simulation with a fast neural network.
-%   Idea from the GM talk "Harnessing Neural Networks to Enable Fast
-%   Vehicle-Level Simulations": run the detailed model over its operating
-%   range once, train a small network on the results, then use the network
-%   wherever speed matters.
-%
-%   Here the "slow model" is the intersection simulator and the network learns
-%       [arrival rate, share of left turns, share of right turns] -> mean delay
-%   Traffic arrives at steady headways here (not randomly) so that each
-%   operating point has one repeatable answer, like GM's steady-state points.
-%   The network (3-8-8-1, tanh) and its Adam training loop are written out
-%   in plain MATLAB, so no toolbox is needed.
-%
-%   The first run builds the training data (several minutes) and saves it to
-%   aws_nn_data.mat; later runs load it and finish in seconds.
+function demo_nn_surrogate
+%DEMO_NN_SURROGATE Neural Network Traffic Surrogate.
+
+projectFolder = fileparts(mfilename('fullpath'));
 
 nSamples = 150;
-dataFile = 'aws_nn_data.mat';
+dataFile = fullfile(projectFolder, 'aws_nn_data.mat');
 
-% --- 1) training data from the full simulation ------------------------------
 if exist(dataFile, 'file')
     S = load(dataFile);
     Xd = S.Xd;  Yd = S.Yd;  tPerSim = S.tPerSim;
@@ -43,7 +31,6 @@ else
     save(dataFile, 'Xd', 'Yd', 'tPerSim');
 end
 
-% --- 2) normalise and split -------------------------------------------------
 n   = size(Xd, 1);
 rng(1);
 idx = randperm(n);
@@ -54,7 +41,6 @@ muY = mean(Yd(tr));        sdY = std(Yd(tr));
 Xn  = (Xd - muX)./sdX;
 Yn  = (Yd - muY)/sdY;
 
-% --- 3) train ---------------------------------------------------------------
 [net, loss] = mlpTrain(Xn(tr, :), Yn(tr), [8 8], 1000, 0.01, 0.003);
 
 predTr = mlpPredict(net, Xn(tr, :))*sdY + muY;
@@ -63,7 +49,6 @@ r2 = @(y, p) 1 - sum((y - p).^2)/sum((y - mean(y)).^2);
 fprintf('R^2  train = %.3f   test = %.3f   (test RMSE %.1f s)\n', ...
     r2(Yd(tr), predTr), r2(Yd(te), predTe), sqrt(mean((Yd(te) - predTe).^2)));
 
-% --- 4) use it: a full operating map in a blink ----------------------------
 [RR, LL] = meshgrid(linspace(0.02, 0.12, 60), linspace(0, 0.4, 60));
 Q  = [RR(:), LL(:), 0.2*ones(numel(RR), 1)];
 tic;
@@ -86,7 +71,8 @@ surf(RR*3600, LL*100, reshape(D, size(RR)), 'EdgeColor', 'none');
 xlabel('arrivals per approach (veh/h)');  ylabel('left turns (%)');  zlabel('mean delay (s)');
 title('Delay map from the network (3600 points)');  view(-40, 30);
 
-% ----------------------------------------------------------------------------
+end
+
 function [net, loss] = mlpTrain(X, Y, hidden, nEpoch, lr, wd)
 % Small fully connected network trained with full-batch Adam.
 % wd = weight decay (keeps the small data set from being memorised).

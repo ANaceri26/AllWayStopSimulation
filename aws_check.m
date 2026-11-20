@@ -1,18 +1,7 @@
 function res = aws_check(R, expect)
 %AWS_CHECK  Pass/fail verdict for one simulation run.
 %   res = aws_check(R, expect)
-%   Always checked (safety + liveness):
-%     - no collision, ever
-%     - no AV crosses its stop line before it has the right of way
-%     - no two conflicting cars are inside the box together
-%     - every car eventually clears the intersection
-%   Optional fields of expect:
-%     order       exact order in which the cars must enter (car IDs)
-%     together    Kx2 pairs of cars that must be in the box at the same time
-%     falseStart  exact number of false starts that must occur
-%     minSep      smallest allowed gap to anything (m)
-%     maxDelay    largest allowed delay of any car (s)
-%     allowBoxConflict   true to tolerate brief box conflicts
+%   expect fields (optional): order, together, falseStart, minSep, maxDelay, allowBoxConflict
 
 if nargin < 2, expect = struct(); end
 msgs = {};

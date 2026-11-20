@@ -1,29 +1,8 @@
 function R = aws_simulate(P, cars, peds)
 %AWS_SIMULATE  Simulate autonomous cars negotiating an all-way-stop intersection.
 %   R = aws_simulate(P, cars, peds)
-%
-%   P     parameters from aws_params
-%   cars  struct array with fields
-%           approach  0=from South, 1=from East, 2=from North, 3=from West
-%           turn      'S' | 'L' | 'R'
-%           tSpawn    time the car appears (s)
-%           dStart    distance from the stop line when it appears (m)
-%           type      'av' (obeys the rules) | 'runner' (human who runs the sign)
-%   peds  (optional) struct array with fields p0, p1 (1x2), t0, speed
-%
-%   Each AV runs the same decision logic every time step:
-%     1. come to a full stop at the line and wait P.dwell seconds
-%     2. never enter while a conflicting car is in the box
-%     3. never enter if a conflicting car is approaching too fast to stop
-%     4. never enter if a pedestrian is (or will soon be) on my path
-%     5. first to stop goes first; ties -> car on the right goes first;
-%        head-on ties -> straight/right before left
-%     6. if everybody is waiting for everybody (4-way tie) a patience timer
-%        breaks the deadlock (ordered token with V2X, random without)
-%   On top of that every car has an "AEB" layer that brakes for anything
-%   found on its path ahead (lead car, pedestrian, rule breaker).
-%
-%   R contains the logged trajectories and safety / performance metrics.
+%   cars: approach (0=S 1=E 2=N 3=W), turn ('S'|'L'|'R'), tSpawn (s), dStart (m), type ('av'|'runner')
+%   peds: p0, p1 (1x2), t0, speed
 
 if nargin < 3 || isempty(peds)
     peds = struct('p0', {}, 'p1', {}, 't0', {}, 'speed', {});
@@ -38,7 +17,7 @@ dt  = P.dt;
 hl  = P.carLen/2;
 hw  = P.carWid/2;
 
-% --- the 12 possible movements and their conflict table --------------------
+% the 12 possible movements and their conflict table
 turnChars = 'SLR';
 mpaths = cell(1, 12);
 for a = 0:3
@@ -85,7 +64,6 @@ for i = 1:N
     Rad(i)   = mpaths{mov(i)}.R;
 end
 
-% --- state -----------------------------------------------------------------
 st   = zeros(1, N);
 s    = zeros(1, N);
 v    = zeros(1, N);
@@ -112,7 +90,6 @@ xs = zeros(1, N);  ys = zeros(1, N);  yw = zeros(1, N);
 for k = 1:K
     t = (k - 1)*dt;
 
-    % ---- pedestrians ------------------------------------------------------
     pp = zeros(0, 2);  pv = zeros(0, 2);
     for q = 1:M
         p0 = peds(q).p0(:)';  p1 = peds(q).p1(:)';
@@ -127,7 +104,6 @@ for k = 1:K
         end
     end
 
-    % ---- spawn ------------------------------------------------------------
     for i = 1:N
         if st(i) == NOTYET && t >= tSpawn(i)
             sNew = max(sLine(i) - dStart(i) - hl, 0.6);
@@ -146,7 +122,7 @@ for k = 1:K
     end
     front = s + hl;
 
-    % ---- stop-sign decisions (all cars decide on the same snapshot) -------
+    % stop-sign decisions (all cars decide on the same snapshot)
     grant   = false(1, N);
     anyGo   = any(st == GO);
     for i = 1:N
@@ -220,7 +196,6 @@ for k = 1:K
         blockedSince(i) = NaN;
     end
 
-    % ---- false start: two conflicting cars went at once -> one backs off --
     for i = 1:N
         if st(i) == GO && ~isRunner(i)
             pI = front(i) - sLine(i);
@@ -241,13 +216,11 @@ for k = 1:K
         end
     end
 
-    % ---- poses ------------------------------------------------------------
     act = find(st >= APPROACH & st <= EXITED);
     for i = act
         [xs(i), ys(i), yw(i)] = localPose(mpaths{mov(i)}, s(i));
     end
 
-    % ---- longitudinal control --------------------------------------------
     acc = zeros(1, N);
     for i = act
         pth = mpaths{mov(i)};
@@ -303,7 +276,6 @@ for k = 1:K
     end
     front = s + hl;
 
-    % ---- state transitions -----------------------------------------------
     for i = act
         switch st(i)
             case APPROACH
@@ -333,7 +305,6 @@ for k = 1:K
         end
     end
 
-    % ---- logging and safety monitors -------------------------------------
     act = find(st >= APPROACH & st <= EXITED);
     for i = act
         [xs(i), ys(i), yw(i)] = localPose(mpaths{mov(i)}, s(i));
@@ -370,7 +341,6 @@ for k = 1:K
     end
 end
 
-% --- results ---------------------------------------------------------------
 idx = 1:kEnd;
 R.t   = (idx - 1)'*dt;
 R.X   = X(idx, :);    R.Y  = Y(idx, :);   R.YAW = YAW(idx, :);
@@ -394,8 +364,6 @@ R.P     = P;
 R.isRunner = isRunner;
 R.name  = '';
 end
-
-% ============================================================================
 function [x, y, yaw] = localPose(pth, s)
 sq  = min(max([s - 0.5; s; s + 0.5], 0), pth.s(end));
 xy  = interp1(pth.s, pth.pts, sq);

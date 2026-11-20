@@ -1,9 +1,4 @@
 %RUN_MONTECARLO  How do traffic volume and perception quality change delay?
-%   Sweeps the arrival rate and compares three "architectures":
-%     1) V2X          cars share exact stop times (distributed, service based)
-%     2) sensors      each car estimates the others, small error (0.5 s)
-%     3) poor sensors large estimation error (1.5 s)
-%   48 short simulations - expect a few minutes on a laptop.
 
 rates  = [0.03 0.06 0.09 0.12];          % arrivals per second per approach
 sigmas = [0 0.5 1.5];

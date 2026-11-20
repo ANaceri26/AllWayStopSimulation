@@ -1,14 +1,9 @@
 function pth = aws_path(P, approach, turn)
 %AWS_PATH  Centre-line path of one movement through the intersection.
-%   approach : 0 = from South (driving north), 1 = from East, 2 = from North,
-%              3 = from West
-%   turn     : 'S' straight, 'L' left, 'R' right
-%   pth.pts  : Kx2 points,  pth.s : arc length,  pth.sLine : s at the stop
-%   line,  pth.sExit : s where the path leaves the intersection box.
 
 w = P.w;  b = P.b;  L = P.L;  ds = P.ds;
 
-% --- built for a car coming from the South, then rotated -------------------
+% built for a car coming from the South, then rotated
 n1   = round((L - b)/ds);
 y    = linspace(-L, -b, n1 + 1)';
 seg1 = [repmat(w/2, n1 + 1, 1), y];

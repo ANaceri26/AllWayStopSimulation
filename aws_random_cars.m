@@ -1,10 +1,6 @@
 function cars = aws_random_cars(rate, T, pLeft, pRight)
 %AWS_RANDOM_CARS  Random (Poisson) arrivals on all four approaches.
 %   cars = aws_random_cars(rate, T, pLeft, pRight)
-%   rate   arrivals per second on EACH approach (0.05 = 180 veh/h)
-%   T      arrivals are generated for 0..T seconds
-%   pLeft, pRight   probability of a left / right turn (rest go straight)
-%   Uses the current random stream: call rng(seed) first for repeatability.
 
 if nargin < 3, pLeft  = 0.2; end
 if nargin < 4, pRight = 0.2; end

@@ -1,12 +1,8 @@
 function R = run_demo(name, viewMode, gifFile)
 %RUN_DEMO  Simulate and animate one all-way-stop scenario.
-%   run_demo                       pick a scenario from a list
 %   run_demo('queue')              2-D top view
 %   run_demo('deadlock4', '3d')    3-D view
 %   run_demo('runner', '3d', 'runner.gif')    also record a GIF
-%
-%   Scenarios: single, fifo, tie_right, head_on_left, concurrent, deadlock4,
-%              queue, pedestrian, runner, false_start, rush_hour
 
 if nargin < 2, viewMode = '2d'; end
 if nargin < 3, gifFile  = '';   end

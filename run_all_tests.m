@@ -1,11 +1,4 @@
 %RUN_ALL_TESTS  Headless regression suite for the all-way-stop simulator.
-%   Runs every scenario (no graphics) and prints a PASS/FAIL table.
-%     Part 1: scripted scenarios with V2X  -> exact expected behaviour
-%     Part 2: same scenarios, sensors only (noisy arrival-time estimates)
-%             -> must still be safe and must not gridlock
-%     Part 3: random traffic, several seeds -> safety + liveness
-%   Takes roughly a minute on a laptop.  For the MATLAB unit-test framework
-%   version use:   results = runtests('AllWayStopTest')
 
 names  = aws_scenario('list');
 nPass  = 0;
@@ -60,7 +53,7 @@ end
 
 fprintf('\n%d of %d tests passed  (%.0f s)\n\n', nPass, nTotal, toc(tAll));
 if nPass < nTotal
-    warning('run_all_tests:failed', '%d test(s) FAILED - see the table above.', nTotal - nPass);
+    error('run_all_tests:failed', '%d test(s) FAILED - see the table above.', nTotal - nPass);
 end
 
 function s = passStr(tf)

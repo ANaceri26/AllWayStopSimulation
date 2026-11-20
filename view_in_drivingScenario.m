@@ -2,18 +2,6 @@ function view_in_drivingScenario(R, egoCar)
 %VIEW_IN_DRIVINGSCENARIO  OPTIONAL: replay a run in Automated Driving Toolbox.
 %   view_in_drivingScenario(R)          bird's-eye plot + chase camera on car 1
 %   view_in_drivingScenario(R, 3)       chase camera follows car 3
-%
-%   Needs Automated Driving Toolbox (everything else in this folder does not).
-%   It only replays the trajectories computed by aws_simulate, so it is light
-%   enough for integrated graphics.  This is the closest thing to a RoadRunner
-%   style view without RoadRunner.
-%
-%   NOTE: this file is the one part of the project that was written without
-%   being exercised; if your release complains, send me the error message.
-%
-%   Example:
-%       [cars, peds, P] = aws_scenario('queue');
-%       R = aws_simulate(P, cars, peds);
 %       view_in_drivingScenario(R, 2)
 
 if nargin < 2, egoCar = 1; end

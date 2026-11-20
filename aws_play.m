@@ -2,15 +2,6 @@ function aws_play(R, opts)
 %AWS_PLAY  Animate a simulation result in 2-D (top view) or 3-D.
 %   aws_play(R)
 %   aws_play(R, struct('view', '3d', 'speed', 1, 'gif', 'demo.gif'))
-%
-%   opts.view    '2d' (default) or '3d'
-%   opts.speed   playback speed factor (1 = real time, 2 = twice as fast)
-%   opts.gif     file name to record an animated GIF ('' = do not record)
-%   opts.skip    draw every skip-th simulation step (default 2 -> 10 fps)
-%
-%   Colours:  blue = approaching, amber = stopped/waiting, green = crossing,
-%             grey = cleared, red = human driver running the sign.
-%   Plain patch graphics only: runs fine on integrated graphics.
 
 if nargin < 2, opts = struct(); end
 if ~isfield(opts, 'view'),  opts.view  = '2d'; end
@@ -37,7 +28,6 @@ axis(ax, 'equal');
 set(ax, 'XLim', [-Lv Lv], 'YLim', [-Lv Lv], 'ZLim', [0 12], ...
         'XTick', [], 'YTick', [], 'ZTick', [], 'Box', 'on');
 
-% --- static scene ----------------------------------------------------------
 flat(ax, [-Lv Lv Lv -Lv], [-Lv -Lv Lv Lv], 0.00, [0.55 0.72 0.50]);      % grass
 flat(ax, [-Lv Lv Lv -Lv], [-w -w w w],     0.01, [0.33 0.33 0.36]);      % E-W road
 flat(ax, [-w w w -w],     [-Lv -Lv Lv Lv], 0.01, [0.33 0.33 0.36]);      % N-S road
@@ -47,12 +37,10 @@ for a = 0:3
     % stop line (across the incoming lane)
     q = [0 -b; w -b; w -b + 0.45; 0 -b + 0.45]*rot;
     flat(ax, q(:, 1), q(:, 2), 0.03, [1 1 1]);
-    % crosswalk stripes
     for xs = -w + 0.35:1.0:w - 0.6
         q = [xs -5.5; xs + 0.5 -5.5; xs + 0.5 -3.9; xs -3.9]*rot;
         flat(ax, q(:, 1), q(:, 2), 0.02, [0.92 0.92 0.92]);
     end
-    % centre line
     q = [0 -Lv; 0 -b]*rot;
     plot3(ax, q(:, 1), q(:, 2), [0.03 0.03], '--', 'Color', [1 0.85 0.2], 'LineWidth', 1.2);
     % stop sign at the right-hand corner
@@ -70,7 +58,6 @@ for a = 0:3
     end
 end
 
-% --- cars ------------------------------------------------------------------
 faces = [1 2 3 4; 5 6 7 8; 1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8];
 hl = P.carLen/2;  hw = P.carWid/2;
 hBody = gobjects(1, N);  hCab = gobjects(1, N);  hTxt = gobjects(1, N);
@@ -102,7 +89,6 @@ else
 end
 hTitle = title(ax, '');
 
-% --- playback --------------------------------------------------------------
 K = numel(R.t);
 firstFrame = true;
 tic;
@@ -148,14 +134,10 @@ for k = 1:opts.skip:K
     end
 end
 end
-
-% ============================================================================
 function flat(ax, xv, yv, z, faceCol)
 patch('Parent', ax, 'XData', xv(:), 'YData', yv(:), 'ZData', z*ones(numel(xv), 1), ...
       'FaceColor', faceCol, 'EdgeColor', 'none');
 end
-
-% ============================================================================
 function Vt = boxVerts(x, y, yaw, x0, x1, hw, z0, z1)
 % 8 corners of a box given in the car frame, moved to the world frame.
 loc = [x0 -hw; x1 -hw; x1 hw; x0 hw];
